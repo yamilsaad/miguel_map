@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -44,10 +43,6 @@ class MapWidgetState extends State<MapWidget> {
       _currentPosition = position;
       _hasLocation = true;
     });
-    if (_mapController != null) {
-      _mapController.move(_currentPosition,
-          15); // Asegúrate de que el controlador esté inicializado
-    }
   }
 
   Future<LatLng> _determinePosition() async {
@@ -86,8 +81,10 @@ class MapWidgetState extends State<MapWidget> {
     ).listen((Position position) {
       setState(() {
         _currentPosition = LatLng(position.latitude, position.longitude);
-        _mapController.move(_currentPosition,
-            _mapController.camera.zoom); // Mueve el mapa junto con el marcador
+        _mapController.move(
+          _currentPosition,
+          _mapController.zoom,
+        ); // Mueve el mapa junto con el marcador
       });
     });
   }
@@ -101,10 +98,14 @@ class MapWidgetState extends State<MapWidget> {
         ? FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _currentPosition,
-              initialZoom: 15,
+              center: _currentPosition,
+              zoom: 15,
               minZoom: 5,
               maxZoom: 18,
+              onMapReady: () {
+                // Mover el mapa a la posición actual una vez que el mapa esté listo
+                _mapController.move(_currentPosition, 15);
+              },
             ),
             children: [
               TileLayer(
